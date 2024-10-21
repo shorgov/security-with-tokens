@@ -1,0 +1,8 @@
+server:
+  error:
+    include-stacktrace: never
+    include-message: always
+auth:
+  tokens:
+    accessTokenDurationInMin: 5
+    refreshTokenDurationInHours: 24
