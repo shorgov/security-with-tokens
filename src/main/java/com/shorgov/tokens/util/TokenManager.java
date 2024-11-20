@@ -40,10 +40,11 @@ public class TokenManager {
 
     public TokenData generateTokenPair(String subject, List<String> roles) {
 
-        UUID uuid = UUID.randomUUID();
+
+        UUID clientId = UUID.randomUUID();
 
         String accessToken = JWT.create()
-                .withJWTId(uuid.toString())
+                .withJWTId(clientId.toString())
                 .withSubject(subject)
                 .withIssuer(ISSUER)
                 .withExpiresAt(Instant.now().plus(accessTokenDurationInMin, ChronoUnit.MINUTES))
@@ -52,10 +53,10 @@ public class TokenManager {
 
 
         long refreshTokenExpirationTime = Instant.now().plus(refreshTokenDurationInHours, ChronoUnit.HOURS).toEpochMilli();
-        RefreshToken refreshToken = new RefreshToken(uuid, subject, refreshTokenExpirationTime);
+        RefreshToken refreshToken = new RefreshToken(UUID.randomUUID(), clientId, subject, refreshTokenExpirationTime);
         String refreshTokenString = refreshToken.toTokenString();
 
-        refreshTokenRepository.save(uuid, refreshToken);
+        refreshTokenRepository.save(refreshToken.uuid(), refreshToken);
 
         return new TokenData(accessToken, refreshTokenString);
     }
@@ -82,11 +83,12 @@ public class TokenManager {
         RefreshToken refreshToken = refreshTokenRepository.findByUUID(refreshTokenUUID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token is not valid"));
 
-        refreshTokenRepository.remove(refreshTokenUUID);
 
-        if (!accessTokenDecoded.getId().equals(refreshTokenId) || !accessTokenDecoded.getSubject().equals(refreshToken.email())) {
+        if (!accessTokenDecoded.getId().equals(refreshToken.clientId().toString()) || !accessTokenDecoded.getSubject().equals(refreshToken.email())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token is not valid");
         }
+
+        refreshTokenRepository.remove(refreshTokenUUID);
         return generateTokenPair(accessTokenDecoded.getSubject(), roles);
     }
 }
