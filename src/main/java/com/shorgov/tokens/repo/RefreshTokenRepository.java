@@ -32,6 +32,6 @@ public class RefreshTokenRepository {
         refreshTokens.entrySet()
                 .stream()
                 .filter(e -> e.getValue().expirationTime() < System.currentTimeMillis())
-                .forEach(e -> remove(e.getKey()));
+                .forEach(e -> refreshTokens.remove(e.getKey()));
     }
 }
