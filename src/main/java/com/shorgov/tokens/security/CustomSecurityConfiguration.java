@@ -28,8 +28,7 @@ import java.util.List;
 public class CustomSecurityConfiguration {
     @Bean
     public AuthenticationProvider getAuthProvider(UserDetailsService userService, PasswordEncoder encoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userService);
         provider.setPasswordEncoder(encoder);
         return provider;
     }
